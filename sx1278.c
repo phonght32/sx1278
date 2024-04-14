@@ -145,8 +145,6 @@ typedef struct sx1278 {
 	sx1278_func_set_gpio 		set_rst;		/*!< Function set reset pin */
 	sx1278_func_get_gpio  		get_irq;  		/*!< Function get irq pin */
 	sx1278_func_delay 			delay;			/*!< Function delay */
-	uint16_t  					read_idx;
-	uint8_t  					rx_buf[256];
 } sx1278_t;
 
 static err_code_t sx1278_read_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
@@ -300,8 +298,6 @@ static err_code_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
 	cmd_data = 0x8d;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd_data, 1);
 
-	handle->read_idx = 0;
-
 	while (1)
 	{
 		sx1278_read_register(handle, SX1278_LR_RegModemStat, &modem_stat, 1);
@@ -356,7 +352,6 @@ err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config)
 	handle->set_rst = config.set_rst;
 	handle->get_irq = config.get_irq;
 	handle->delay = config.delay;
-	handle->read_idx = 0;
 
 	return ERR_CODE_SUCCESS;
 }
