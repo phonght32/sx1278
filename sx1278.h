@@ -167,7 +167,7 @@ err_code_t sx1278_config(sx1278_handle_t handle);
 
 /*
  * @brief   Transmit data. After that, monitor IRQ pin is necessary to call
- * 			"sx1278_clear_lora_irq" which clear interrupt flags.
+ * 			"sx1278_lora_clear_irq_flags" which clear transmitted interrupt flags.
  *
  * @note    SX1278 need to be configured in SX1278_TRANSCEIVER_MODE_TX mode.
  *
@@ -183,7 +183,7 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
 
 /*
  * @brief   Transmit data and polling until IRQ is triggered or timeout. Function
- * 			"sx1278_clear_lora_irq" is called automatically to clear interrupt
+ * 			"sx1278_lora_clear_irq_flags" is called automatically to clear interrupt
  * 			flags if transmit success.
  *
  * @note 	Functions "get_irq" and "delay" need to be assigned .
@@ -200,7 +200,7 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
 err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms);
 
 /*
- * @brief   Receive data and call "sx1278_clear_lora_irq" automatically to clear
+ * @brief   Receive data and call "sx1278_lora_clear_irq_flags" automatically to clear
  * 			interrupt flags when receive success.
  * 			Monitor IRQ pin is neccessary to ensure data are received before
  * 			call this function.
@@ -218,8 +218,9 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
 err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes);
 
 /*
- * @brief   Polling until IRQ pin is triggered or timeout. Then receive data and
- * 			call "sx1278_clear_lora_irq" automatically to clear interrupt flags.
+ * @brief   Polling until IRQ pin is triggered or timeout. When data is received,
+ * 			function "sx1278_lora_clear_irq_flags" is called automatically to clear
+ * 			interrupt flags.
  *
  * @note    Functions "get_irq" and "delay" need to be assigned.
  * 			SX1278 need to be configured in SX1278_TRANSCEIVER_MODE_RX mode.
@@ -234,6 +235,24 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
  *      - Others:           Fail.
  */
 err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms);
+
+/*
+ * @brief   Clear LoRa interrupt flags.
+ *
+ * @note 	Mode transmitter: After data sent by "sx1278_lora_transmit", this
+ * 			function should be called when IRQ pin triggered which notify
+ * 			transmit complete.
+ * 			Mode receiver: This function should be called when IRQ pin triggered
+ * 			which notify data ready. Then, "nrf24l01_receive" can be called to
+ * 			read received data.
+ *
+ * @param 	handle Handle structure.
+ *
+ * @return
+ *      - ERR_CODE_SUCCESS: Success.
+ *      - Others:           Fail.
+ */
+err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
 
 /*
  * @brief   Get RSSI in LoRa mode.
@@ -269,17 +288,6 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
  *      - Others:           Fail.
  */
 err_code_t sx1278_hw_reset(sx1278_handle_t handle);
-
-/*
- * @brief   Clear LoRa interrupt flags.
- *
- * @param 	handle Handle structure.
- *
- * @return
- *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
- */
-err_code_t sx1278_clear_lora_irq(sx1278_handle_t handle);
 
 #ifdef __cplusplus
 }

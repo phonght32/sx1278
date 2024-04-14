@@ -226,7 +226,7 @@ static err_code_t sx1278_enter_lora_transmitter(sx1278_handle_t handle)
 	cmd_data = 0x41;
 	sx1278_write_register(handle, SX1278_LR_REG_DIOMAPPING1, &cmd_data, 1);
 
-	sx1278_clear_lora_irq(handle);
+	sx1278_lora_clear_irq_flags(handle);
 
 	/* Open TX done interrupt */
 	cmd_data = 0xF7;
@@ -284,7 +284,7 @@ static err_code_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
 	cmd_data = 0x3F;
 	sx1278_write_register(handle, SX1278_LR_RegIrqFlagsMask, &cmd_data, 1);
 
-	sx1278_clear_lora_irq(handle);
+	sx1278_lora_clear_irq_flags(handle);
 
 	/* Packet length - This register must be defined when the data long of one byte in SF is 6 */
 	cmd_data = handle->packet_len;
@@ -512,7 +512,8 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
 		handle->get_irq(&irq_level);
 		if (irq_level)
 		{
-			sx1278_clear_lora_irq(handle);
+			sx1278_lora_clear_irq_flags(handle);
+
 			return ERR_CODE_SUCCESS;
 		}
 
@@ -563,7 +564,7 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
 	sx1278_read_register(handle, SX1278_LR_RegFifo, data, packet_size);
 
 	/* Clear interrupt flags */
-	sx1278_clear_lora_irq(handle);
+	sx1278_lora_clear_irq_flags(handle);
 
 	*num_bytes = packet_size;
 
@@ -612,7 +613,7 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
 			sx1278_read_register(handle, SX1278_LR_RegFifo, data, packet_size);
 
 			/* Clear interrupt flags */
-			sx1278_clear_lora_irq(handle);
+			sx1278_lora_clear_irq_flags(handle);
 
 			*num_bytes = packet_size;
 
@@ -626,6 +627,20 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
 
 		handle->delay(1);
 	}
+
+	return ERR_CODE_SUCCESS;
+}
+
+err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle)
+{
+	/* Check if handle structure is NULL */
+	if (handle == NULL)
+	{
+		return ERR_CODE_NULL_PTR;
+	}
+
+	uint8_t cmd = 0xFF;
+	sx1278_write_register(handle, SX1278_LR_RegIrqFlags, &cmd, 1);
 
 	return ERR_CODE_SUCCESS;
 }
@@ -699,20 +714,6 @@ err_code_t sx1278_hw_reset(sx1278_handle_t handle)
 	handle->set_rst(SX1278_RST_UNACTIVE);
 
 	handle->delay(100);
-
-	return ERR_CODE_SUCCESS;
-}
-
-err_code_t sx1278_clear_lora_irq(sx1278_handle_t handle)
-{
-	/* Check if handle structure is NULL */
-	if (handle == NULL)
-	{
-		return ERR_CODE_NULL_PTR;
-	}
-
-	uint8_t cmd = 0xFF;
-	sx1278_write_register(handle, SX1278_LR_RegIrqFlags, &cmd, 1);
 
 	return ERR_CODE_SUCCESS;
 }
