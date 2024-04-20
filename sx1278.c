@@ -131,20 +131,20 @@
 #define SX1278_RST_UNACTIVE   					1
 
 typedef struct sx1278 {
-	uint64_t  					freq;			/*!< Frequency */
-	uint8_t  					packet_len;		/*!< Packet length */
-	sx1278_output_pwr_t   		output_pwr;	 	/*!< Ouput power */
-	sx1278_spread_factor_t 		spread_factor;	/*!< Spread factor */
-	sx1278_bandwidth_t  		bandwidth;		/*!< Bandwidth */
-	sx1278_coding_rate_t  		coding_rate;	/*!< Coding rate */
-	sx1278_crc_mode_t 			crc_en;			/*!< CRC enable/disable */
-	sx1278_transceiver_mode_t 	mode;			/*!< Transceiver mode */
-	sx1278_func_spi_send 		spi_send;		/*!< Function SPI send */
-	sx1278_func_spi_recv 		spi_recv;		/*!< Function SPI receive */
-	sx1278_func_set_gpio 		set_cs;			/*!< Function set chip select pin */
-	sx1278_func_set_gpio 		set_rst;		/*!< Function set reset pin */
-	sx1278_func_get_gpio  		get_irq;  		/*!< Function get irq pin */
-	sx1278_func_delay 			delay;			/*!< Function delay */
+	uint64_t  					freq;				/*!< Frequency */
+	uint8_t  					packet_len;			/*!< Packet length */
+	sx1278_output_pwr_t   		output_pwr;	 		/*!< Ouput power */
+	sx1278_spread_factor_t 		spread_factor;		/*!< Spread factor */
+	sx1278_bandwidth_t  		bandwidth;			/*!< Bandwidth */
+	sx1278_coding_rate_t  		coding_rate;		/*!< Coding rate */
+	sx1278_crc_mode_t 			crc_en;				/*!< CRC enable/disable */
+	sx1278_transceiver_mode_t 	transceiver_mode;	/*!< Transceiver mode */
+	sx1278_func_spi_send 		spi_send;			/*!< Function SPI send */
+	sx1278_func_spi_recv 		spi_recv;			/*!< Function SPI receive */
+	sx1278_func_set_gpio 		set_cs;				/*!< Function set chip select pin */
+	sx1278_func_set_gpio 		set_rst;			/*!< Function set reset pin */
+	sx1278_func_get_gpio  		get_irq;  			/*!< Function get irq pin */
+	sx1278_func_delay 			delay;				/*!< Function delay */
 } sx1278_t;
 
 static err_code_t sx1278_read_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
@@ -192,7 +192,7 @@ static err_code_t sx1278_enter_sleep(sx1278_handle_t handle)
 	uint8_t cmd = 0x08;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd, 1);
 
-	handle->mode = SX1278_TRANSCEIVER_MODE_SLEEP;
+	handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_SLEEP;
 
 	return ERR_CODE_SUCCESS;
 }
@@ -202,7 +202,7 @@ static err_code_t sx1278_enter_standby(sx1278_handle_t handle)
 	uint8_t cmd = 0x09;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd, 1);
 
-	handle->mode = SX1278_TRANSCEIVER_MODE_STANDBY;
+	handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_STANDBY;
 
 	return ERR_CODE_SUCCESS;
 }
@@ -246,7 +246,7 @@ static err_code_t sx1278_enter_lora_transmitter(sx1278_handle_t handle)
 
 		if (payload_len == handle->packet_len)
 		{
-			handle->mode = SX1278_TRANSCEIVER_MODE_TX;
+			handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_TX;
 			return ERR_CODE_SUCCESS;
 		}
 
@@ -304,7 +304,7 @@ static err_code_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
 
 		if ((modem_stat & 0x04) == 0x04)
 		{
-			handle->mode = SX1278_TRANSCEIVER_MODE_RX;
+			handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_RX;
 			return ERR_CODE_SUCCESS;
 		}
 
@@ -345,7 +345,7 @@ err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config)
 	handle->bandwidth = config.bandwidth;
 	handle->coding_rate = config.coding_rate;
 	handle->crc_en = config.crc_en;
-	handle->mode = config.mode;
+	handle->transceiver_mode = config.transceiver_mode;
 	handle->spi_send = config.spi_send;
 	handle->spi_recv = config.spi_recv;
 	handle->set_cs = config.set_cs;
@@ -462,7 +462,7 @@ err_code_t sx1278_config(sx1278_handle_t handle)
 	cmd_data = 0x01;
 	sx1278_write_register(handle, SX1278_LR_REG_DIOMAPPING2, &cmd_data, 1);
 
-	ret = sx1278_set_transceiver_mode(handle, handle->mode);
+	ret = sx1278_set_transceiver_mode(handle, handle->transceiver_mode);
 
 	return ret;
 }
@@ -475,7 +475,7 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data)
 		return ERR_CODE_NULL_PTR;
 	}
 
-	if (handle->mode != SX1278_TRANSCEIVER_MODE_TX)
+	if (handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_TX)
 	{
 		return ERR_CODE_FAIL;
 	}
@@ -496,7 +496,7 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
 		return ERR_CODE_NULL_PTR;
 	}
 
-	if ((handle->mode != SX1278_TRANSCEIVER_MODE_TX) || (handle->get_irq == NULL) || (handle->delay == NULL))
+	if ((handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_TX) || (handle->get_irq == NULL) || (handle->delay == NULL))
 	{
 		return ERR_CODE_FAIL;
 	}
@@ -536,7 +536,7 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
 		return ERR_CODE_NULL_PTR;
 	}
 
-	if (handle->mode != SX1278_TRANSCEIVER_MODE_RX)
+	if (handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_RX)
 	{
 		return ERR_CODE_FAIL;
 	}
@@ -579,7 +579,7 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
 		return ERR_CODE_NULL_PTR;
 	}
 
-	if ((handle->mode != SX1278_TRANSCEIVER_MODE_RX) || (handle->get_irq == NULL) || (handle->delay == NULL))
+	if ((handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_RX) || (handle->get_irq == NULL) || (handle->delay == NULL))
 	{
 		return ERR_CODE_FAIL;
 	}
@@ -668,7 +668,7 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
 
 	err_code_t ret;
 
-	switch (handle->mode)
+	switch (handle->transceiver_mode)
 	{
 	case SX1278_TRANSCEIVER_MODE_SLEEP:
 		ret = sx1278_enter_sleep(handle);

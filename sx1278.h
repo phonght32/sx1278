@@ -116,20 +116,20 @@ typedef enum {
  * @brief   Configuration structure.
  */
 typedef struct {
-	uint64_t  					freq;			/*!< Frequency */
-	uint8_t  					packet_len;		/*!< Packet length */
-	sx1278_output_pwr_t   		output_pwr;	 	/*!< Ouput power */
-	sx1278_spread_factor_t 		spread_factor;	/*!< Spread factor */
-	sx1278_bandwidth_t  		bandwidth;		/*!< Bandwidth */
-	sx1278_coding_rate_t  		coding_rate;	/*!< Coding rate */
-	sx1278_crc_mode_t 			crc_en;			/*!< CRC enable/disable */
-	sx1278_transceiver_mode_t 	mode;			/*!< Transceiver mode */
-	sx1278_func_spi_send 		spi_send;		/*!< Function SPI send */
-	sx1278_func_spi_recv 		spi_recv;		/*!< Function SPI receive */
-	sx1278_func_set_gpio 		set_cs;			/*!< Function set chip select pin */
-	sx1278_func_set_gpio 		set_rst;		/*!< Function set reset pin */
-	sx1278_func_get_gpio  		get_irq;  		/*!< Function get irq pin */
-	sx1278_func_delay 			delay;			/*!< Function delay */
+	uint64_t  					freq;				/*!< Frequency */
+	uint8_t  					packet_len;			/*!< Packet length */
+	sx1278_output_pwr_t   		output_pwr;	 		/*!< Ouput power */
+	sx1278_spread_factor_t 		spread_factor;		/*!< Spread factor */
+	sx1278_bandwidth_t  		bandwidth;			/*!< Bandwidth */
+	sx1278_coding_rate_t  		coding_rate;		/*!< Coding rate */
+	sx1278_crc_mode_t 			crc_en;				/*!< CRC enable/disable */
+	sx1278_transceiver_mode_t 	transceiver_mode;	/*!< Transceiver mode */
+	sx1278_func_spi_send 		spi_send;			/*!< Function SPI send */
+	sx1278_func_spi_recv 		spi_recv;			/*!< Function SPI receive */
+	sx1278_func_set_gpio 		set_cs;				/*!< Function set chip select pin */
+	sx1278_func_set_gpio 		set_rst;			/*!< Function set reset pin */
+	sx1278_func_get_gpio  		get_irq;  			/*!< Function get irq pin */
+	sx1278_func_delay 			delay;				/*!< Function delay */
 } sx1278_cfg_t;
 
 /*
