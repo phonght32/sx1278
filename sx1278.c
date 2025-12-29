@@ -147,7 +147,7 @@ typedef struct sx1278 {
 	sx1278_func_delay 			delay;				/*!< Function delay */
 } sx1278_t;
 
-static err_code_t sx1278_read_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
+static sx1278_status_t sx1278_read_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
 {
 	if (handle->set_cs != NULL)
 	{
@@ -164,10 +164,10 @@ static err_code_t sx1278_read_register(sx1278_handle_t handle, uint8_t reg_addr,
 		handle->set_cs(SX1278_CS_UNACTIVE);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-static err_code_t sx1278_write_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
+static sx1278_status_t sx1278_write_register(sx1278_handle_t handle, uint8_t reg_addr, uint8_t *data, uint16_t len)
 {
 	if (handle->set_cs != NULL)
 	{
@@ -184,30 +184,30 @@ static err_code_t sx1278_write_register(sx1278_handle_t handle, uint8_t reg_addr
 		handle->set_cs(SX1278_CS_UNACTIVE);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-static err_code_t sx1278_enter_sleep(sx1278_handle_t handle)
+static sx1278_status_t sx1278_enter_sleep(sx1278_handle_t handle)
 {
 	uint8_t cmd = 0x08;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd, 1);
 
 	handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_SLEEP;
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-static err_code_t sx1278_enter_standby(sx1278_handle_t handle)
+static sx1278_status_t sx1278_enter_standby(sx1278_handle_t handle)
 {
 	uint8_t cmd = 0x09;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd, 1);
 
 	handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_STANDBY;
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-static err_code_t sx1278_enter_lora_transmitter(sx1278_handle_t handle)
+static sx1278_status_t sx1278_enter_lora_transmitter(sx1278_handle_t handle)
 {
 	uint8_t tx_base_addr;
 	uint8_t cmd_data;
@@ -247,21 +247,21 @@ static err_code_t sx1278_enter_lora_transmitter(sx1278_handle_t handle)
 		if (payload_len == handle->packet_len)
 		{
 			handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_TX;
-			return ERR_CODE_SUCCESS;
+			return SX1278_STATUS_SUCCESS;
 		}
 
 		if (--timeout_ms == 0)
 		{
-			return ERR_CODE_FAIL;
+			return SX1278_STATUS_FAILED;
 		}
 
 		handle->delay(1);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-static err_code_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
+static sx1278_status_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
 {
 	uint8_t rx_base_addr;
 	uint8_t cmd_data;
@@ -305,18 +305,18 @@ static err_code_t sx1278_enter_lora_receiver(sx1278_handle_t handle)
 		if ((modem_stat & 0x04) == 0x04)
 		{
 			handle->transceiver_mode = SX1278_TRANSCEIVER_MODE_RX;
-			return ERR_CODE_SUCCESS;
+			return SX1278_STATUS_SUCCESS;
 		}
 
 		if (--timeout_ms == 0)
 		{
-			return ERR_CODE_FAIL;
+			return SX1278_STATUS_FAILED;
 		}
 
 		handle->delay(1);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
 sx1278_handle_t sx1278_init(void)
@@ -330,12 +330,12 @@ sx1278_handle_t sx1278_init(void)
 	return handle;
 }
 
-err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config)
+sx1278_status_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	handle->freq = config.freq;
@@ -353,18 +353,18 @@ err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config)
 	handle->get_irq = config.get_irq;
 	handle->delay = config.delay;
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_config(sx1278_handle_t handle)
+sx1278_status_t sx1278_config(sx1278_handle_t handle)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
-	err_code_t ret;
+	sx1278_status_t ret;
 	uint8_t cmd_data;
 	uint8_t freq_reg[3];
 
@@ -467,17 +467,17 @@ err_code_t sx1278_config(sx1278_handle_t handle)
 	return ret;
 }
 
-err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data)
+sx1278_status_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	if (handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_TX)
 	{
-		return ERR_CODE_FAIL;
+		return SX1278_STATUS_FAILED;
 	}
 
 	sx1278_write_register(handle, SX1278_LR_RegFifo, data, handle->packet_len);
@@ -485,20 +485,20 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data)
 	uint8_t cmd_data = 0x8B;
 	sx1278_write_register(handle, SX1278_LR_RegOpMode, &cmd_data, 1);
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms)
+sx1278_status_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	if ((handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_TX) || (handle->get_irq == NULL) || (handle->delay == NULL))
 	{
-		return ERR_CODE_FAIL;
+		return SX1278_STATUS_FAILED;
 	}
 
 	sx1278_write_register(handle, SX1278_LR_RegFifo, data, handle->packet_len);
@@ -514,31 +514,31 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
 		{
 			sx1278_lora_clear_irq_flags(handle);
 
-			return ERR_CODE_SUCCESS;
+			return SX1278_STATUS_SUCCESS;
 		}
 
 		if (--timeout_ms == 0)
 		{
-			return ERR_CODE_FAIL;
+			return SX1278_STATUS_FAILED;
 		}
 
 		handle->delay(1);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes)
+sx1278_status_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	if (handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_RX)
 	{
-		return ERR_CODE_FAIL;
+		return SX1278_STATUS_FAILED;
 	}
 
 	uint8_t addr;
@@ -568,20 +568,20 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
 
 	*num_bytes = packet_size;
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms)
+sx1278_status_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	if ((handle->transceiver_mode != SX1278_TRANSCEIVER_MODE_RX) || (handle->get_irq == NULL) || (handle->delay == NULL))
 	{
-		return ERR_CODE_FAIL;
+		return SX1278_STATUS_FAILED;
 	}
 
 	uint8_t irq_level;
@@ -617,56 +617,56 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
 
 			*num_bytes = packet_size;
 
-			return ERR_CODE_SUCCESS;
+			return SX1278_STATUS_SUCCESS;
 		}
 
 		if (--timeout_ms == 0)
 		{
-			return ERR_CODE_FAIL;
+			return SX1278_STATUS_FAILED;
 		}
 
 		handle->delay(1);
 	}
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle)
+sx1278_status_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	uint8_t cmd = 0xFF;
 	sx1278_write_register(handle, SX1278_LR_RegIrqFlags, &cmd, 1);
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi)
+sx1278_status_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	sx1278_read_register(handle, SX1278_LR_RegRssiValue, rssi, 1);
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }
 
-err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceiver_mode_t mode)
+sx1278_status_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceiver_mode_t mode)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
-	err_code_t ret;
+	sx1278_status_t ret;
 
 	switch (handle->transceiver_mode)
 	{
@@ -677,13 +677,13 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
 		ret = sx1278_enter_standby(handle);
 		break;
 	case SX1278_TRANSCEIVER_MODE_FS_TX:
-		ret = ERR_CODE_FAIL;
+		ret = SX1278_STATUS_FAILED;
 		break;
 	case SX1278_TRANSCEIVER_MODE_TX:
 		ret = sx1278_enter_lora_transmitter(handle);
 		break;
 	case SX1278_TRANSCEIVER_MODE_FS_RX:
-		ret = ERR_CODE_FAIL;
+		ret = SX1278_STATUS_FAILED;
 		break;
 	case SX1278_TRANSCEIVER_MODE_RX:
 		ret = sx1278_enter_lora_receiver(handle);
@@ -696,17 +696,17 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
 	return ret;
 }
 
-err_code_t sx1278_hw_reset(sx1278_handle_t handle)
+sx1278_status_t sx1278_hw_reset(sx1278_handle_t handle)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
 	{
-		return ERR_CODE_NULL_PTR;
+		return SX1278_STATUS_INVALID_ARG;
 	}
 
 	if (handle->set_rst == NULL)
 	{
-		return ERR_CODE_FAIL;
+		return SX1278_STATUS_FAILED;
 	}
 
 	handle->set_rst(SX1278_RST_ACTIVE);
@@ -715,5 +715,5 @@ err_code_t sx1278_hw_reset(sx1278_handle_t handle)
 
 	handle->delay(100);
 
-	return ERR_CODE_SUCCESS;
+	return SX1278_STATUS_SUCCESS;
 }

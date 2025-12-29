@@ -27,15 +27,22 @@
 extern "C" {
 #endif
 
-#include "err_code.h"
+#include "stdint.h"
 
 #define SX1278_IRQ_ACTIVE_LEVEL  		0
 #define SX1278_IRQ_UNACTIVE_LEVEL		1
 
-typedef err_code_t (*sx1278_func_spi_send)(uint8_t *buf_send, uint16_t len);
-typedef err_code_t (*sx1278_func_spi_recv)(uint8_t *buf_recv, uint16_t len);
-typedef err_code_t (*sx1278_func_set_gpio)(uint8_t level);
-typedef err_code_t (*sx1278_func_get_gpio)(uint8_t *level);
+typedef enum
+{
+	SX1278_STATUS_SUCCESS,
+	SX1278_STATUS_FAILED,
+	SX1278_STATUS_INVALID_ARG
+} sx1278_status_t;
+
+typedef sx1278_status_t (*sx1278_func_spi_send)(uint8_t *buf_send, uint16_t len);
+typedef sx1278_status_t (*sx1278_func_spi_recv)(uint8_t *buf_recv, uint16_t len);
+typedef sx1278_status_t (*sx1278_func_set_gpio)(uint8_t level);
+typedef sx1278_status_t (*sx1278_func_get_gpio)(uint8_t *level);
 typedef void (*sx1278_func_delay)(uint32_t time_ms);
 
 /**
@@ -152,10 +159,10 @@ sx1278_handle_t sx1278_init(void);
  * @param   config Configuration structure.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config);
+sx1278_status_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config);
 
 /*
  * @brief   Configure SX1278.
@@ -163,10 +170,10 @@ err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config);
  * @param 	handle Handle structure.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_config(sx1278_handle_t handle);
+sx1278_status_t sx1278_config(sx1278_handle_t handle);
 
 /*
  * @brief   Transmit data. After that, monitor IRQ pin is necessary to call
@@ -179,10 +186,10 @@ err_code_t sx1278_config(sx1278_handle_t handle);
  * @param 	data Data.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
+sx1278_status_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
 
 /*
  * @brief   Transmit data and polling until IRQ is triggered or timeout. Function
@@ -197,10 +204,10 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
  * @param 	timeout_ms Timeout in ms.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms);
+sx1278_status_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms);
 
 /*
  * @brief   Receive data and call "sx1278_lora_clear_irq_flags" automatically to clear
@@ -215,10 +222,10 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
  * @param 	num_bytes Number of bytes data that have been received.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes);
+sx1278_status_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes);
 
 /*
  * @brief   Polling until IRQ pin is triggered or timeout. When data is received,
@@ -234,10 +241,10 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
  * @param 	timeout_ms Timeout in ms.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms);
+sx1278_status_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms);
 
 /*
  * @brief   Clear LoRa interrupt flags.
@@ -252,10 +259,10 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
  * @param 	handle Handle structure.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
+sx1278_status_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
 
 /*
  * @brief   Get RSSI in LoRa mode.
@@ -264,10 +271,10 @@ err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
  * @param 	rssi RSSI.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi);
+sx1278_status_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi);
 
 /*
  * @brief   Configure SX1278 to enter sleep.
@@ -276,10 +283,10 @@ err_code_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi);
  * @param 	mode Transceiver mode.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceiver_mode_t mode);
+sx1278_status_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceiver_mode_t mode);
 
 /*
  * @brief   Reset SX1278 by hardware.
@@ -287,10 +294,10 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
  * @param 	handle Handle structure.
  *
  * @return
- *      - ERR_CODE_SUCCESS: Success.
+ *      - SX1278_STATUS_SUCCESS: Success.
  *      - Others: Failed.
  */
-err_code_t sx1278_hw_reset(sx1278_handle_t handle);
+sx1278_status_t sx1278_hw_reset(sx1278_handle_t handle);
 
 #ifdef __cplusplus
 }
