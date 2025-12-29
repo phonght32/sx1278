@@ -141,7 +141,7 @@ typedef struct {
  *
  * @return
  *      - Handle structure: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 sx1278_handle_t sx1278_init(void);
 
@@ -153,7 +153,7 @@ sx1278_handle_t sx1278_init(void);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config);
 
@@ -164,7 +164,7 @@ err_code_t sx1278_set_config(sx1278_handle_t handle, sx1278_cfg_t config);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_config(sx1278_handle_t handle);
 
@@ -180,7 +180,7 @@ err_code_t sx1278_config(sx1278_handle_t handle);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
 
@@ -198,7 +198,7 @@ err_code_t sx1278_lora_transmit(sx1278_handle_t handle, uint8_t *data);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, uint32_t timeout_ms);
 
@@ -216,7 +216,7 @@ err_code_t sx1278_lora_transmit_polling(sx1278_handle_t handle, uint8_t *data, u
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes);
 
@@ -235,7 +235,7 @@ err_code_t sx1278_lora_receive(sx1278_handle_t handle, uint8_t *data, uint16_t *
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, uint16_t *num_bytes, uint32_t timeout_ms);
 
@@ -253,7 +253,7 @@ err_code_t sx1278_lora_receive_polling(sx1278_handle_t handle, uint8_t *data, ui
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
 
@@ -265,7 +265,7 @@ err_code_t sx1278_lora_clear_irq_flags(sx1278_handle_t handle);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi);
 
@@ -277,7 +277,7 @@ err_code_t sx1278_lora_get_rssi(sx1278_handle_t handle, uint8_t *rssi);
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceiver_mode_t mode);
 
@@ -288,7 +288,7 @@ err_code_t sx1278_set_transceiver_mode(sx1278_handle_t handle, sx1278_transceive
  *
  * @return
  *      - ERR_CODE_SUCCESS: Success.
- *      - Others:           Fail.
+ *      - Others: Failed.
  */
 err_code_t sx1278_hw_reset(sx1278_handle_t handle);
 
